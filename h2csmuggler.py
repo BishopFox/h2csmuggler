@@ -256,7 +256,7 @@ def scan(line):
         settings_header_value = h2_connection.initiate_upgrade_connection()
 
         send_initial_request(connection, proxy_url,
-                             settings_header_value, None)
+                             settings_header_value)
         get_upgrade_response(connection)
 
         print("[INFO] Success! " + line + " can be used for tunneling")
