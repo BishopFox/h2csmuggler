@@ -89,7 +89,8 @@ def get_upgrade_response(connection):
     # An upgrade response begins HTTP/1.1 101 Switching Protocols.
     split_headers = headers.split()
     if split_headers[1] != b'101':
-        raise RuntimeError("Not upgrading!")
+        print("[INFO] Failed to upgrade.")
+        sys.exit(1)
 
     return rest
 
@@ -249,7 +250,7 @@ def scan(line):
     try:
         proxy_url = urlparse(line)
 
-        connection = establish_tcp_connection(proxy_url, None)
+        connection = establish_tcp_connection(proxy_url)
 
         h2_connection = h2.connection.H2Connection()
         settings_header_value = h2_connection.initiate_upgrade_connection()
