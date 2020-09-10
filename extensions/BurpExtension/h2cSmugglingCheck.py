@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from burp import IBurpExtender
 from burp import IScannerCheck
 from burp import IScanIssue
