@@ -79,7 +79,7 @@ def send_initial_request(connection, proxy_url, settings):
     connection.sendall(request)
 
 
-def get_upgrade_response(connection):
+def get_upgrade_response(connection, proxy_url):
     data = b''
     while b'\r\n\r\n' not in data:
         data += connection.recv(8192)
@@ -89,10 +89,10 @@ def get_upgrade_response(connection):
     # An upgrade response begins HTTP/1.1 101 Switching Protocols.
     split_headers = headers.split()
     if split_headers[1] != b'101':
-        print("[INFO] Failed to upgrade.")
-        sys.exit(1)
+        print("[INFO] Failed to upgrade: " + proxy_url.geturl())
+        return None, False
 
-    return rest
+    return rest, True
 
 
 def getData(h2_connection, sock):
@@ -175,6 +175,10 @@ def main(args):
     """
     The client upgrade flow.
     """
+    if not args.proxy.startswith("http"):
+        print("[ERROR]: invalid protocol: " + args.proxy, file=sys.stderr)
+        sys.exit(1)
+
     proxy_url = urlparse(args.proxy)
 
     # Step 1: Establish the TCP connecton.
@@ -189,7 +193,11 @@ def main(args):
     send_initial_request(connection, proxy_url, settings_header_value)
 
     # Step 4: Read the HTTP/1.1 response, look for 101 response.
-    extra_data = get_upgrade_response(connection)
+    extra_data, success = get_upgrade_response(connection, proxy_url)
+
+    if not success:
+        sys.exit(1)
+
     print("[INFO] h2c stream established successfully.")
     if args.test:
         print("[INFO] Success! " + args.proxy + " can be used for tunneling")
@@ -249,6 +257,9 @@ def scan(line):
     connection = None
     try:
         proxy_url = urlparse(line)
+        if not line.startswith("http"):
+            print("[ERROR]: skipping invalid protocol: " + line)
+            return
 
         connection = establish_tcp_connection(proxy_url)
 
@@ -257,7 +268,9 @@ def scan(line):
 
         send_initial_request(connection, proxy_url,
                              settings_header_value)
-        get_upgrade_response(connection)
+        _, success = get_upgrade_response(connection, proxy_url)
+        if not success:
+            return
 
         print("[INFO] Success! " + line + " can be used for tunneling")
         sys.stdout.flush()
