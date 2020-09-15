@@ -137,6 +137,12 @@ optional arguments:
 ./h2csmuggler.py --scan-list urls.txt --threads 5
 ```
 
+Or, to redirect output to a file. Use stderr (`2>`) and stdout (`1>`). The stderr stream contains errors (e.g., SSL handshake/timeout issues), while stdout contains results.
+
+```
+./h2csmuggler.py --scan-list urls.txt --threads 5 2>errors.txt 1>results.txt
+```
+
 2\. Sending a smuggled POST request past `https://edgeserver` to an internal endpoint:
 ```
 ./h2csmuggler.py -x https://edgeserver -X POST -d '{"user":128457 "role": "admin"}' -H "Content-Type: application/json" -H "X-SYSTEM-USER: true" http://backend/api/internal/user/permissions
