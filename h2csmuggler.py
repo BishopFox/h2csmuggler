@@ -226,6 +226,10 @@ def main(args):
 
     for url in urls:
         path = url.path or "/"
+        query = url.query
+
+        if query:
+            path = path + "?" + query
 
         smuggled_request_headers = [
             (':method', args.request),
