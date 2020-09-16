@@ -277,6 +277,9 @@ def scan(line):
             return
 
         print("[INFO] Success! " + line + " can be used for tunneling")
+        text_file = open("vun.txt", "a")
+        text_file.write(""+line+"\n")
+        text_file.close()
         sys.stdout.flush()
     except Exception as e:
         print("[ERROR] " + e.__str__() + ": " + line, file=sys.stderr)
