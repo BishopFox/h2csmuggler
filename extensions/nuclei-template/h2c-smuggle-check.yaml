@@ -1,0 +1,27 @@
+id: h2c-smuggling-check
+
+info:
+  name: h2c smuggling detection
+  author: Jake Miller (@theBumbleSec) & Hazana (@HazanaSec)
+  severity: info
+  lab: https://labs.bishopfox.com/tech-blog/h2c-smuggling-request-smuggling-via-http/2-cleartext-h2c
+
+# 1. Nuclei force adds a "Connection: close" which will break this check.
+# 2. Prefer usage on SSL/TLS web services. Using on cleartext services may result
+# in a false positive by upgrading the connection to the edge server rather
+# than to the backend server.
+# 3. Each respective path on the webserver may result in a distinct proxypass.
+# Some may be vulnerable while other might not.
+
+requests:
+  - raw:
+    - |
+      GET / HTTP/1.1
+      Host: {{Hostname}}
+      Upgrade: h2c
+      HTTP2-Settings: AAMAAABkAARAAAAAAAIAAAAA
+      Connection: Upgrade, HTTP2-Settings
+    matchers:
+      - type: status
+        status:
+          - 101
