@@ -46,7 +46,13 @@ def establish_tcp_connection(proxy_url):
 
     retSock = sock
     if proxy_url.scheme == "https":
-        retSock = ssl.wrap_socket(sock, ssl_version=ssl.PROTOCOL_TLS)
+        # fix https://github.com/BishopFox/h2csmuggler/issues/10 start
+        # retSock = ssl.wrap_socket(sock, ssl_version=ssl.PROTOCOL_TLS)
+        ctx=ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+        ctx.set_ciphers('ALL')
+        retSock = ctx.wrap_socket(sock, server_hostname=connect_args[0])
+        # fix https://github.com/BishopFox/h2csmuggler/issues/10 end
+        
 
     retSock.settimeout(MAX_TIMEOUT)
     retSock.connect(connect_args)
